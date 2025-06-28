@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: TailorTalk
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run ui.py
+    envVars:
+      - key: GOOGLE_CREDENTIALS_JSON
+        value: ""
+      - key: CALENDAR_ID
+        value: ""
+      - key: TIMEZONE
+        value: "Asia/Kolkata"
