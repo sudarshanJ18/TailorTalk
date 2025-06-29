@@ -1,24 +1,21 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import uvicorn
+from backend.calendar_utils import calendar_manager
+from backend.booking_agent import booking_agent
+from backend.schemas import ChatRequest, ChatResponse, BookingRequest, AvailabilityRequest
 import logging
-from booking_agent import booking_agent
-from schemas import ChatRequest, ChatResponse, BookingRequest, AvailabilityRequest
-from calendar_utils import calendar_manager
+import uvicorn
 
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
 app = FastAPI(
     title="TailorTalk API",
     description="Appointment Booking Assistant API",
     version="1.0.0"
 )
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,24 +34,20 @@ async def health_check():
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """Main chat endpoint for natural language interactions"""
     try:
         logger.info(f"Received chat request: {request.message}")
         result = booking_agent.process_message(request.message)
-        
         return ChatResponse(
             response=result["response"],
             available_slots=result.get("available_slots"),
             booking_confirmed=result.get("booking_confirmed")
         )
-        
     except Exception as e:
         logger.error(f"Chat endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/book")
 async def book_appointment(request: BookingRequest):
-    """Direct booking endpoint"""
     try:
         result = calendar_manager.book_appointment(
             request.date,
@@ -63,23 +56,19 @@ async def book_appointment(request: BookingRequest):
             request.title,
             request.description
         )
-        
         if result["success"]:
             return JSONResponse(content=result)
         else:
             raise HTTPException(status_code=400, detail=result["error"])
-            
     except Exception as e:
         logger.error(f"Booking endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/availability")
 async def check_availability(request: AvailabilityRequest):
-    """Check availability for a specific date"""
     try:
         slots = calendar_manager.get_free_slots(request.date, request.duration)
         return {"date": request.date, "available_slots": slots}
-        
     except Exception as e:
         logger.error(f"Availability endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
