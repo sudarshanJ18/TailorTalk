@@ -4,7 +4,6 @@ import json
 from datetime import datetime, timedelta
 import pandas as pd
 
-# Page configuration
 st.set_page_config(
     page_title="TailorTalk",
     page_icon="🗕️",
@@ -12,7 +11,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
 st.markdown("""
 <style>
     .main-header {
@@ -44,8 +42,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# App configuration
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = "https://tailortalk-57zz.onrender.com"
 
 def check_backend_health():
     try:
